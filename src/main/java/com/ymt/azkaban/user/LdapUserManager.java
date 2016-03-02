@@ -101,21 +101,19 @@ public class LdapUserManager extends XmlUserManager {
 				throw new UserManagerException("Invalid id property name "
 						+ ldapUserIdProperty);
 			}
-			User user = new User(idAttribute.getString());
-			if (emailAttribute != null) {
-				user.setEmail(emailAttribute.getString());
-			}
-
-			// 基于xml进行角色授权，如果xml不存在赋值basic.XmlUserManager在user找不到时会抛异常
+			
+			User user = null;
 			try{
-				User user_auth = super.getUser(idAttribute.getString(), "not set");
-				
-				for (String role : user_auth.getRoles()) {
-					user.addRole(role);
-				}
+				// 基于xml进行角色授权，如果xml不存在赋值basic.XmlUserManager在user找不到时会抛异常
+				user = super.getUser(idAttribute.getString(), "password not set");
 			}catch(UserManagerException e){
+				user = new User(idAttribute.getString());
 				user.addRole("basic");
 				user.addGroup("basic");
+			}
+			
+			if (emailAttribute != null) {
+				user.setEmail(emailAttribute.getString());
 			}
 			
 			connection.unBind();
